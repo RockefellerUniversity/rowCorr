@@ -1,0 +1,16 @@
+Package: rowCorr
+Type: Package
+Title: Single-cell Multiomic Enhancer-based Gene Regulatory Network Inference
+Version: 1.0.2
+Author: Zhijian Li
+Maintainer: Zhijian Li <lzj1769@gmail.com>
+Description: Infering gene regulatory network from single-cell multi-omics data.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+URL: https://costalab.github.io/scMEGA/
+Depends:
+    R
+LinkingTo: Rcpp
+Imports: 
+    Rcpp
