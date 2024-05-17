@@ -1,23 +1,23 @@
 getCorr <- function(SE_RNA,SE_ATAC,max.dist= 250000){
   o <- data.frame(findOverlaps(resize(SE_RNA, 2 * max.dist + 
-                                        1, "center"), resize(rowRanges(SE_ATAC_filt), 1, "center"), 
+                                        1, "center"), resize(rowRanges(SE_ATAC), 1, "center"), 
                                ignore.strand = TRUE))
   
   o$distance <- IRanges::distance(rowRanges(SE_RNA)[o[, 1]], 
-                                  rowRanges(SE_ATAC_filt)[o[, 2]])
+                                  rowRanges(SE_ATAC)[o[, 2]])
   
   colnames(o) <- c("gene_idx", "peak_idx", "distance")
-  nullCor <- .getNullCorrelations(SE_ATAC_filt, SE_RNA, o, 1000)
+  nullCor <- .getNullCorrelations(SE_ATAC, SE_RNA, o, 1000)
   
-  df <- rowRanges(SE_ATAC_filt)[o$peak_idx, ]
+  df <- rowRanges(SE_ATAC)[o$peak_idx, ]
   o$gene <- rowData(SE_RNA)[o$gene_idx, ]$SYMBOL
   o$peak <- paste0(df@seqnames, "-", as.data.frame(df@ranges)$start, 
                    "-", as.data.frame(df@ranges)$end)
   o$Correlation <- rowCorr:::rowCorCpp(as.integer(o$peak_idx), as.integer(o$gene_idx), 
-                                       assay(SE_ATAC_filt), assay(SE_RNA))
+                                       assay(SE_ATAC), assay(SE_RNA))
   o$TStat <- (o$Correlation/sqrt((pmax(1 - o$Correlation^2, 
-                                       1e-17, na.rm = TRUE))/(ncol(SE_ATAC_filt) - 2)))
-  o$Pval <- 2 * pt(-abs(o$TStat), ncol(SE_ATAC_filt) - 2)
+                                       1e-17, na.rm = TRUE))/(ncol(SE_ATAC) - 2)))
+  o$Pval <- 2 * pt(-abs(o$TStat), ncol(SE_ATAC) - 2)
   o$FDR <- p.adjust(o$Pval, method = "fdr")
   o$EmpPval <- 2*pnorm(-abs(((o$Correlation - mean(nullCor[[2]])) / sd(nullCor[[2]]))))
   o$EmpFDR <- p.adjust(o$EmpPval, method = "fdr")
